@@ -5,7 +5,7 @@ export default (url,method='GET',data={},headers={},credentials)=>{
         url,
         method,
         headers,
-        withCredentials: credentials
+        withCredentials: true
     }
     if(method==='GET'){
         options.params=data;

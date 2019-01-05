@@ -32,7 +32,7 @@ class Sidebar extends Component{
                         <Menu.Item key="new-blog"><Link to="/admin/home/blog-manage/new-blog" />新建文章</Menu.Item>
                         <Menu.Item key="blog-list"><Link to="/admin/home/blog-manage/blog-list" />文章列表</Menu.Item>
                     </SubMenu>
-                    <Menu.Item key="tag-manage"><Link to="/admin/home/tag-manage" /><Icon type="appstore" />分类管理</Menu.Item>
+                    <Menu.Item key="type-manage"><Link to="/admin/home/type-manage" /><Icon type="appstore" />分类管理</Menu.Item>
                     <SubMenu key="message-manage" title={<span><Icon type="notification" />留言管理</span>}>
                         <Menu.Item key="message-list"><Link to="/admin/home/message-manage/message-list" />留言列表</Menu.Item>
                     </SubMenu>

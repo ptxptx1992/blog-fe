@@ -65,8 +65,16 @@ class NormalLoginForm extends Component{
         this.props.form.validateFields( async(err, values) => {
             if (!err) {
                 let res = await http(api.REGISTER,'POST',values);
+                if(res.code===0){
+                    Message.success('注册成功');
+                }else{
+                    Message.error(res.message);
+                }
             }
         });
+    }
+    test=async ()=>{
+        await http(api.LOGIN,'POST')
     }
     loginSubmit = (e) => {
         e.preventDefault();
@@ -79,7 +87,7 @@ class NormalLoginForm extends Component{
                 this.setState({
                     loginLoading:false
                 })
-                if(res.code===200){
+                if(res.code===0){
                     
                     this.props.history.push( '/admin/home',null)
                 }else{
@@ -188,6 +196,7 @@ class NormalLoginForm extends Component{
                     </FormItem>
                 </Form>
                 }
+                 <Button type="primary"  onClick={this.test}>test</Button>
             </div>
         )
     }
