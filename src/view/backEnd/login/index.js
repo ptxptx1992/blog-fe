@@ -1,8 +1,10 @@
 import React,{Component} from 'react'
 import { Form, Icon, Input, Button ,Message} from 'antd';
 import './style.less'
-import http from '../../../api/http'
-import api from '../../../api/api'
+import http from '@/api/http'
+import api from '@/api/api'
+import { connect } from 'react-redux';
+import {saveUserInfo} from '@/store/user/action.js'
 
 const FormItem = Form.Item;
 const formItemLayout = {
@@ -27,6 +29,7 @@ const tailFormItemLayout = {
         },
     },
 };
+@connect(state=>({user:state.user}),{saveUserInfo})
 class NormalLoginForm extends Component{
     state={
         moduleLogin:true,
@@ -73,9 +76,6 @@ class NormalLoginForm extends Component{
             }
         });
     }
-    test=async ()=>{
-        await http(api.LOGIN,'POST')
-    }
     loginSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields(async (err, values) => {
@@ -88,8 +88,12 @@ class NormalLoginForm extends Component{
                     loginLoading:false
                 })
                 if(res.code===0){
-                    
-                    this.props.history.push( '/admin/home',null)
+                    this.props.history.push( '/admin/home');
+                    this.props.saveUserInfo({
+                        name:res.data.user_name,
+                        id:res.data.id,
+                    });
+                    sessionStorage.setItem('id',res.data.id);
                 }else{
                     Message.error(res.message);
                 }
@@ -97,6 +101,7 @@ class NormalLoginForm extends Component{
         });
     }
     componentDidMount = async ()=>{
+        sessionStorage.setItem('id','');
         let res = await http(api.GET_COUNTRY_DATA,'POST');
     }
     render(){
@@ -196,7 +201,6 @@ class NormalLoginForm extends Component{
                     </FormItem>
                 </Form>
                 }
-                 <Button type="primary"  onClick={this.test}>test</Button>
             </div>
         )
     }

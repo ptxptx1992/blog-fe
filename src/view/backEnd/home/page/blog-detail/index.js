@@ -14,7 +14,7 @@ class newBlog extends Component{
         typeList:[],
         type:'',
         title:'',
-        
+        id:''
     }
     initEditor(){
         const elem = this.refs.editorElem
@@ -27,9 +27,9 @@ class newBlog extends Component{
         }
         editor.customConfig.zIndex = 100
         editor.create();
-        editor.txt.html(this.state.editorInitData)
+        editor.txt.html(this.state.editorInitData);
     }
-    save=async (type=1)=>{
+    edit= async()=>{
         if(!this.state.title){
             message.warning('请输入标题');
         }
@@ -37,16 +37,16 @@ class newBlog extends Component{
             message.warning('请输入内容');
         }
         else{
-            let params={
-                title:this.state.title,
-                content:this.state.editorContent,
-                type:this.state.type,
-                isPublish:type
-            }
-            let res=await http(api.ADD_ARTICLE,'POST',params);
-            if(res.code===0){
-                message.success('操作成功！');
-            }
+            // let params={
+            //     title:this.state.title,
+            //     content:this.state.editorContent,
+            //     type:this.state.type,
+            //     id:this.state.id,
+            // }
+            // let res=await http(api.EDIT_ARTICLE,'POST',params);
+            // if(res.code===0){
+            //     message.success('操作成功！');
+            // }
         }
     }
     changeType=(value)=>{
@@ -55,7 +55,7 @@ class newBlog extends Component{
         })
     }
     changeTitle=(event)=>{
-        console.log(event)
+       
         this.setState({
             title:event.target.value
         })
@@ -65,15 +65,32 @@ class newBlog extends Component{
         if(res.code===0){
             this.setState({
                 typeList:res.data.list,
-                type:res.data.list[0].id 
+                type:res.data.list[0].id
             },()=>{
                 console.log(this.state.type)
             })
         }
     }
-    
+    getData=async()=>{
+        let res= await http(api.GET_ARTICLE_DETAIL,'POST',{id:this.props.location.query.id});
+        if(res.code===0){
+            this.setState({
+                editorInitData:res.data[0].content,
+                title:res.data[0].title,
+                type:res.data[0].type,
+            },()=>{
+                console.log(this.state.editorInitData)
+            })
+        }
+    }
     componentDidMount=async()=>{
         this.getTypeList();
+        if(this.props.location.query&&this.props.location.query.id){
+            this.setState({
+                id:this.props.location.query.id
+            })
+            await  this.getData();
+        }
         this.initEditor();
     }   
     render(){
@@ -84,7 +101,7 @@ class newBlog extends Component{
                         文章管理
                     </Breadcrumb.Item>
                     <Breadcrumb.Item style={{fontSize:18}}>
-                        新建文章
+                        文章详情
                     </Breadcrumb.Item>
                 </Breadcrumb>
                 <div className="titleContainer">
@@ -99,8 +116,7 @@ class newBlog extends Component{
                     <div ref="editorElem" className="editorMenu"></div>
                 </div>
                 <div style={{textAlign:'right'}}>
-                    <Button  onClick={this.save.bind(this,1)}  type="primary" style={{marginRight:'5px'}}>保存</Button>
-                    <Button  onClick={this.save.bind(this,2)}  type="primary">立刻发布</Button>
+                    <Button  onClick={this.edit}  type="primary">保存修改</Button>
                 </div>
             </div>
         )

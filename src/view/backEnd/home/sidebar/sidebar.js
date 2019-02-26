@@ -26,7 +26,7 @@ class Sidebar extends Component{
                     <Menu.Item key="data-statistics">
                         <Link to="/admin/home/data-statistics" />
                         <Icon type="pie-chart" />
-                        <span>数据统计</span>
+                        <span>数据统计(mock)</span>
                     </Menu.Item>
                     <SubMenu key="blog-manage" title={<span><Icon type="file-text" />文章管理</span>}>
                         <Menu.Item key="new-blog"><Link to="/admin/home/blog-manage/new-blog" />新建文章</Menu.Item>

@@ -7,6 +7,6 @@ export default createStore(
     }),
     compose(
         applyMiddleware(thunk),
-        // window.devToolsExtension?window.devToolsExtension():()=>{}
+        window.devToolsExtension?window.devToolsExtension():()=>{}
     )
 )

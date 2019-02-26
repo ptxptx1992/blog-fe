@@ -1,39 +1,50 @@
 import React, { Component } from 'react';
-import { Table,Button, Row, Col,Select,Form,Radio, Breadcrumb,message} from 'antd';
+import { Table,Button, Row, Col,Select,Form,Modal, Breadcrumb,message} from 'antd';
 import { DatePicker } from 'antd';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './style.less'
+import http from '@/api/http'
+import api from '@/api/api'
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
-
-
-
+const confirm = Modal.confirm;
 class BlogList extends Component{
     state = {
         columns:[
-            {
-                title: '标题',
-                dataIndex: 'question_count',
-                key: 'question_count',
-              }, {
-                title: '状态',
-                dataIndex: 'target_count',
-                key: 'target_count',
-              }, {
-                title: '发布时间',
-                dataIndex: 'gap_count',
-                key: 'gap_count',
-              }, {
-                title: '下架时间',
-                dataIndex: 'question_cover_rate',
-                key:'question_cover_rate'
+                {
+                title: 'id',
+                dataIndex: 'id',
+                key: 'id',
               },
               {
-                title: '作者',
-                dataIndex: 'question_homework_similar_rate',
-                key:'question_homework_similar_rate'
+                title: '标题',
+                dataIndex: 'title',
+                key: 'title',
+              }, {
+                title: '状态',
+                dataIndex: 'type',
+                key: 'type',
+              }, {
+                title: '发布时间',
+                dataIndex: 'create_time',
+                key: 'create_time',
+              }, {
+                title: '更新时间',
+                dataIndex: 'update_time',
+                key:'update_time'
               },
+              ,{ title: '操作',render: (text, record) => (
+                <span>
+                    <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.editRow.bind(this,text)}>编辑</a>
+                    <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.editType.bind(this,text,3)}>删除</a>
+                    {
+                        text.status===1 ? <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.editType.bind(this,text,2)}>发布</a>
+                        : <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.editType.bind(this,text,1)}>下架</a>
+                    }
+                </span>
+                ),
+            },
         ],
         tableData:[],
         pagination: {
@@ -41,9 +52,12 @@ class BlogList extends Component{
             pageSize:10,
         },
         total:0,
-        
+        typeList:[{id:'', key:'', name: "全部"}],
+        type:'',
+        status:'',
+        startTime:'',
+        endTime:''
     }
-    
     search = ()=>{
         this.setState({
             buttonLoading:true,
@@ -54,43 +68,112 @@ class BlogList extends Component{
         })
         this.getData();
     }
-    getData= async (params={})=>{
-        console.log(111)
+    getTypeList= async()=>{
+        let res=await http(api.GET_ARTICLE_TYPE_LIST_NOPAGE,'POST',{});
+        if(res.code===0){
+            let list=[...this.state.typeList,...res.data.list]
+            this.setState({
+                typeList:list,
+                type:''
+            },()=>{
+                console.log('list',this.state.typeList)
+            })
+        }
     }
-    export= () =>{
+    editRow=(row)=>{
+       this.props.history.push({pathname:"/admin/home/blog-manage/blog-detail",query: { id : row.id}});
+    }
+    editType=(row,status)=>{
+        let name;
+        switch(status){
+            case 1:name='下架'
+            break;
+            case 2:name='发布'
+            break;
+            case 3:name='删除'
+            break;
+            default:name='删除'
+        }
+        confirm({
+            title: `是否要${name}该文章?`,
+            okText: 'Yes',
+            okType: 'danger',
+            cancelText: 'No',
+            onOk :async()=>{
+                this.confirmEditType(row.id,status)
+            },
+          });
+    }
+    confirmEditType=async (id,status)=>{
+        let res=await http(api.EDIT_ARTICLE_STATUS,'POST',{
+            id:id,
+            status:status,
+        });
+        if(res.code===0){
+            this.getData();
+            message.success('操作成功')
+        }
+    }
+    getData= async (params={})=>{
+        let res=await http(api.GET_ARTICLE_LIST,'POST',{
+            page:this.state.pagination.current,
+            pageSize:this.state.pagination.pageSize,
+            articleType:this.state.type,
+            articleStatus:this.state.status,
+            startTime:this.state.startTime,
+            endTime:this.state.endTime
+        });
+        if(res.code===0){
+            this.setState({
+                buttonLoading:false,
+                tableData:res.data.list
+            })
+        }
+    }
+    changeType=(value)=>{
+        this.setState({
+            type:value
+        })
+    }
+    changeStatus=(value)=>{
+        this.setState({
+            status:value
+        })
+    }
+    onTimeChange=(date, dateString)=>{
+        this.setState({
+            startTime:dateString[0],
+            endTime:dateString[1],
+        })
+    }
+    export=async () =>{
+        // let res=await http(api.DOWNLOAD_ARTICLE_LIST,'POST',{
+        //     type:this.state.type,
+        //     status:this.state.status,
+        // });
+       
         let exportForm=document.createElement('form');
         exportForm.method='post';
-        exportForm.action=``;
+        exportForm.action=api.DOWNLOAD_ARTICLE_LIST;
         let exportInput1=document.createElement('input');
         let exportInput2=document.createElement('input');
-        let exportInput3=document.createElement('input');
-        let exportInput4=document.createElement('input');
-        let exportInput5=document.createElement('input');
-        let exportInput6=document.createElement('input');
-        exportInput1.setAttribute('name','edition_id');
-        exportInput1.setAttribute('value',this.state.book);
-        exportInput2.setAttribute('name','grade');
-        exportInput2.setAttribute('value',this.state.grade);
-        exportInput3.setAttribute('name','assist_type');
-        exportInput3.setAttribute('value',this.state.type);
-        exportInput4.setAttribute('name','section_process');
-        exportInput4.setAttribute('value',this.state.upDown);
-        exportInput5.setAttribute('name','is_gap');
-        exportInput5.setAttribute('value',this.state.isLack);
-        exportInput6.setAttribute('name','sort_type');
-        exportInput6.setAttribute('value',this.state.sort);
+       
+        exportInput1.setAttribute('name','type');
+        exportInput1.setAttribute('value',this.state.type);
+        exportInput2.setAttribute('name','status');
+        console.log('status',this.state.status)
+        exportInput2.setAttribute('value',this.state.status);
+        
         exportForm.appendChild(exportInput1);
         exportForm.appendChild(exportInput2);
-        exportForm.appendChild(exportInput3);
-        exportForm.appendChild(exportInput4);
-        exportForm.appendChild(exportInput5);
-        exportForm.appendChild(exportInput6);
+       
         document.body.appendChild(exportForm) ;  
         exportForm.submit() ;     
         document.body.removeChild(exportForm) ;
     }
     
     async componentDidMount(){
+        this.getTypeList();
         this.getData();
     }
     render(){
@@ -109,10 +192,8 @@ class BlogList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`文章类型`}>
-                                    <Select defaultValue="js" >
-                                        <Option value="js">JS</Option>
-                                        <Option value="css">CSS</Option>
-                                        <Option value="casual">随便谈</Option>
+                                    <Select value={this.state.type}  onChange={this.changeType}>
+                                        {this.state.typeList.map((val)=> {return (<Option key={val.id} value={val.id}>{val.name}</Option>)})}
                                     </Select>
                                 </FormItem>
                             </div>
@@ -120,7 +201,8 @@ class BlogList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`文章状态`} >
-                                    <Select defaultValue="1" >
+                                    <Select  value={this.state.status}  onChange={this.changeStatus}>
+                                        <Option value="">全部</Option>
                                         <Option value="1">待发布</Option>
                                         <Option value="2">已发布</Option>
                                         <Option value="3">已下架</Option>
@@ -132,7 +214,7 @@ class BlogList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`时间范围`}>
-                                    <RangePicker  />
+                                    <RangePicker  onChange={this.onTimeChange}   />
                                 </FormItem>
                             </div>
                         </Col>

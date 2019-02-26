@@ -2,37 +2,49 @@ import React, { Component } from 'react';
 import { Table,Button, Row, Col,Select,Form,Radio, Breadcrumb,message} from 'antd';
 import { DatePicker } from 'antd';
 import {Link} from 'react-router-dom';
+import http from '@/api/http'
+import api from '@/api/api'
 import './style.less'
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 
-
-
 class MessageList extends Component{
     state = {
         columns:[
-            {
+             {
+                title: 'ID',
+                dataIndex: 'id',
+                key: 'id',
+             }, 
+             {
                 title: '留言内容',
-                dataIndex: 'question_count',
-                key: 'question_count',
+                dataIndex: 'content',
+                key: 'content',
               }, {
                 title: '留言时间',
-                dataIndex: 'target_count',
-                key: 'target_count',
+                dataIndex: 'date',
+                key: 'date',
               }, {
                 title: '状态',
-                dataIndex: 'gap_count',
-                key: 'gap_count',
-              }, {
-                title: '地区',
-                dataIndex: 'question_cover_rate',
-                key:'question_cover_rate'
+                render:(text,record)=>{
+                    <span>{this.getStatusText(text)}</span>
+                }
               },
               {
                 title: '对应文章',
-                dataIndex: 'question_homework_similar_rate',
-                key:'question_homework_similar_rate'
+                dataIndex: 'title',
+                key:'title'
+              },
+              ,{ title: '操作',render: (text, record) => (
+                <span>
+                    {
+                    text.status===1 ? <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.updateStatus.bind(this,text,2)}>通过</a>
+                    : ''
+                    }
+                    <a href="javascript:;" style={{ marginRight: '8px' }} onClick={this.updateStatus.bind(this,text,3)} >删除</a>
+                </span>
+                ),
               },
         ],
         tableData:[],
@@ -41,9 +53,12 @@ class MessageList extends Component{
             pageSize:10,
         },
         total:0,
-        
+        articleList:[{id:'', key:'', title: "全部"}],
+        article:'',
+        status:'',
+        startTime:'',
+        endTime:'',
     }
-    
     search = ()=>{
         this.setState({
             buttonLoading:true,
@@ -54,43 +69,81 @@ class MessageList extends Component{
         })
         this.getData();
     }
+    getArticleList= async()=>{
+        let res=await http(api.GET_ARTICLE_LIST_NOPAGE,'POST',{});
+        if(res.code===0){
+            let list=[...this.state.articleList,...res.data]
+            this.setState({
+                articleList:list,
+            },()=>{
+                console.log('list',this.state.articleList)
+            })
+        }
+    }
+    changeStatus=async(val)=>{
+        this.setState({
+            status:val
+        })
+    }
     getData= async (params={})=>{
-        console.log(111)
+        let res=await http(api.GET_MESSAGE_LIST,'POST',{
+            page:this.state.pagination.current,
+            pageSize:this.state.pagination.pageSize,
+            article:this.state.article,
+            status:this.state.status,
+            startTime:this.state.startTime,
+            endTime:this.state.endTime
+        });
+        if(res.code===0){
+            const pagination = {...this.state.pagination};
+            pagination.total = parseInt(res.data.count,10);
+            this.setState({
+                tableData:res.data.list,
+                pagination:pagination,
+            })
+        }
     }
-    export= () =>{
-        let exportForm=document.createElement('form');
-        exportForm.method='post';
-        exportForm.action=``;
-        let exportInput1=document.createElement('input');
-        let exportInput2=document.createElement('input');
-        let exportInput3=document.createElement('input');
-        let exportInput4=document.createElement('input');
-        let exportInput5=document.createElement('input');
-        let exportInput6=document.createElement('input');
-        exportInput1.setAttribute('name','edition_id');
-        exportInput1.setAttribute('value',this.state.book);
-        exportInput2.setAttribute('name','grade');
-        exportInput2.setAttribute('value',this.state.grade);
-        exportInput3.setAttribute('name','assist_type');
-        exportInput3.setAttribute('value',this.state.type);
-        exportInput4.setAttribute('name','section_process');
-        exportInput4.setAttribute('value',this.state.upDown);
-        exportInput5.setAttribute('name','is_gap');
-        exportInput5.setAttribute('value',this.state.isLack);
-        exportInput6.setAttribute('name','sort_type');
-        exportInput6.setAttribute('value',this.state.sort);
-        exportForm.appendChild(exportInput1);
-        exportForm.appendChild(exportInput2);
-        exportForm.appendChild(exportInput3);
-        exportForm.appendChild(exportInput4);
-        exportForm.appendChild(exportInput5);
-        exportForm.appendChild(exportInput6);
-        document.body.appendChild(exportForm) ;  
-        exportForm.submit() ;     
-        document.body.removeChild(exportForm) ;
+    changeArticle=(value)=>{
+        this.setState({
+            article:value
+        })
     }
-    
+    onTimeChange=(date, dateString)=>{
+        this.setState({
+            startTime:dateString[0],
+            endTime:dateString[1],
+        })
+    }
+    getStatusText=(text)=>{
+        return 1111;
+        console.log(text.status)
+        // switch(text.status){
+        //     case 1: 
+        //         return '待审核'
+        //     break;
+        //     case 2: 
+        //         return '已审核'
+        //     break;
+        //     case 3: 
+        //         return '已删除'
+        //     break;
+        //     default:
+        //         return '待审核'
+        // }
+        
+    }
+    updateStatus=async(row,status)=>{
+        let res=await http(api.UPDATE_MESSAGE_LIST,'POST',{
+            id:row.id,
+            status:status
+        });
+        if(res.code===0){
+            this.getData();
+            message.success('操作成功！')
+        }
+    }
     async componentDidMount(){
+        this.getArticleList();
         this.getData();
     }
     render(){
@@ -109,10 +162,8 @@ class MessageList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`文章列表`}>
-                                    <Select defaultValue="js" >
-                                        <Option value="js">JS</Option>
-                                        <Option value="css">CSS</Option>
-                                        <Option value="casual">随便谈</Option>
+                                    <Select value={this.state.article}  onChange={this.changeArticle}>
+                                        {this.state.articleList.map((val)=> {return (<Option key={val.id} value={val.id}>{val.title}</Option>)})}
                                     </Select>
                                 </FormItem>
                             </div>
@@ -120,7 +171,8 @@ class MessageList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`留言状态`} >
-                                    <Select defaultValue="1" >
+                                    <Select  value={this.state.status}  onChange={this.changeStatus}>
+                                        <Option value="0">全部</Option>
                                         <Option value="1">待审核</Option>
                                         <Option value="2">已通过</Option>
                                         <Option value="3">已舍弃</Option>
@@ -131,7 +183,7 @@ class MessageList extends Component{
                         <Col className="gutter-row" span={6}>
                             <div className="gutter-box">
                                 <FormItem label={`时间范围`}>
-                                    <RangePicker  />
+                                    <RangePicker  onChange={this.onTimeChange}   />
                                 </FormItem>
                             </div>
                         </Col>

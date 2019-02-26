@@ -29,10 +29,7 @@ export default function setOption(date_arr, quantity_arr, cover_rate_arr) {
             top:'5%',
             bottom: '25%',
         },
-        legend: {
-            data: ['题量', '覆盖度'],
-            bottom:20,
-        },
+        
         xAxis: [{
             type: 'category',
             data: date_arr,

@@ -1,6 +1,6 @@
 import React,{Component} from 'react'
 import { connect } from 'react-redux';
-import {saveUserInfo} from './../../store/user/action.js'
+import {saveUserInfo} from '@/store/user/action.js'
 import Content from './content'
 import Header  from './header'
 @connect(state=>({user:state.user}),{saveUserInfo})

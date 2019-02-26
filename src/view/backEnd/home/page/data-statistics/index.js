@@ -18,8 +18,8 @@ class DataStatistics extends Component{
     state = {
         totalView:0,
         todayView:0,
-        quantityLoading:true,
-        totalLoading:true,
+        quantityLoading:false,
+        totalLoading:false,
         version_arr:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
         quantity_arr:[10000,20000,9999,7987,10000,20000,9999,7987,9999,7987,10000,20000],
         cover_rate_arr:[2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 75.6, 82.2, 48.7, 18.8, 6.0, 2.3],
@@ -106,12 +106,11 @@ class DataStatistics extends Component{
         console.log(res)
     }
     componentDidMount = async ()=>{
-       
         this.getData()
-    //    this.getQuantity();
-    //    this.getTotalChartData();
-    //    await this.getMenuInfo();
-    //    this.search();
+        this.getQuantity();
+        this.getTotalChartData();
+        await this.getMenuInfo();
+        this.search();
     }
     render(){
         return (

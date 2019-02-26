@@ -3,7 +3,7 @@ import Header from './header/header'
 import Sidebar from './sidebar/sidebar'
 import Content from './content/content'
 
-export default class Admin extends Component{
+ class Admin extends Component{
     render(){
         return(
             <div id="homeContainer"  style={{display:'flex',flexDirection:'column',height:'100vh',minWidth:'1200px'}}>
@@ -20,3 +20,4 @@ export default class Admin extends Component{
         )
     }
 }
+export default Admin

@@ -57,6 +57,7 @@ class TypeForm extends Component{
         name:'',
         title:'新增类型',
         id:'',
+        tableLoading:false,
         
         
     }
@@ -133,6 +134,9 @@ class TypeForm extends Component{
         })
     }
     getData= async ()=>{
+        this.setState({
+            tableLoading:true,
+         });
         let res = await http(api.GET_ARTICLE_TYPE_LIST,'POST',{page:this.state.pagination.current,pageSize:this.state.pagination.pageSize});
         if(res.code===0){
             const pagination = {...this.state.pagination};
@@ -140,10 +144,14 @@ class TypeForm extends Component{
             this.setState({
                 tableData:res.data.list,
                 pagination:pagination,
+                tableLoading:false,
             })
         }else{
             Message.error(res.message);
         }
+        this.setState({
+           tableLoading:false,
+        });
     }
     async componentDidMount(){
         this.getData();
