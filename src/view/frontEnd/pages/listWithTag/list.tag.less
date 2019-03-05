@@ -1,0 +1,59 @@
+.listTagContainer{
+    .tagList{
+        display:flex;
+        flex-wrap: wrap;
+        padding: 0.5rem ;
+        background: #fff;
+        button{
+            margin:0.5rem 0.5rem 0px 0px;
+            display: block;
+            padding: .6rem 1.6rem;
+            border:1px solid #d2d2d2;
+            border-radius: .6rem;
+            color:rgba(0, 0, 0, .8);
+            /*transition渐变*/
+            background-color: #f7f7f7;
+            transition: all .4s;
+            cursor: pointer;
+            &:hover{
+                /*transition渐变*/
+              background-color: #555555;
+              color: #fff;
+            }
+            &:focus{
+                outline: 0;
+            }
+            &.active{
+                background-color: #555555;
+                color: #fff;
+            }
+        }
+        
+    }
+    .blogList{
+        background: #fff;
+        padding: 1rem;
+        article{
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            padding: 1rem;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #ebeef5;
+            background-color: #fff;
+            min-height: 100px;
+            margin-bottom: 1.2rem;
+            header{
+                color: #303133;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                flex-wrap: wrap;
+                margin: 0.8rem 0;
+                &>span:nth-of-type(1){
+                    font-size: 1.2rem;
+                }
+                
+            }
+        }
+    }
+}
